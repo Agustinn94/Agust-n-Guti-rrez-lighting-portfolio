@@ -1027,6 +1027,7 @@
     <div id="adminBar" class="admin-bar">
         <button class="admin-btn" onclick="openAddModal()">➕ Add Project</button>
         <button class="admin-btn" onclick="manageCategories()">🏷️ Categories</button>
+        <button class="admin-btn" onclick="generarIndexHTML()" style="background: #27ae60; font-weight: 700;">🚀 GENERAR INDEX.HTML</button>
         <button class="admin-btn" onclick="exportData()">💾 Export</button>
         <button class="admin-btn" onclick="importData()">📂 Import</button>
         <button class="admin-btn delete" onclick="clearAllProjects()">🗑️ Clear All</button>
@@ -1589,6 +1590,45 @@
 
         function closeEditTextModal() {
             document.getElementById('editTextModal').classList.remove('show');
+        }
+
+        function generarIndexHTML() {
+            const contenidoCompleto = document.documentElement.cloneNode(true);
+            const script = contenidoCompleto.querySelector('script');
+            const codigoActual = script.textContent;
+            
+            const nuevoScript = `
+        const projects = ${JSON.stringify(projects)};
+        const publications = ${JSON.stringify(publications)};
+        const categories = ${JSON.stringify(categories)};
+        const skills = ${JSON.stringify(skills)};
+        const profilePicture = ${JSON.stringify(profilePicture)};
+        
+        let tempImages = [];
+        let currentImageIndex = 0;
+        let currentViewProject = null;
+        
+        if (profilePicture) {
+            document.getElementById('profileContainer').innerHTML = '<img src="' + profilePicture + '" alt="Profile">';
+        }
+        
+        ${codigoActual.split('let profilePicture')[1].split('init();')[0]}
+        
+        init();
+    `;
+            
+            script.textContent = nuevoScript;
+            contenidoCompleto.querySelector('#adminBar').remove();
+            contenidoCompleto.querySelectorAll('.delete-project-btn, .delete-publication-btn, .remove-skill-btn, .add-skill-btn, .add-publication-btn').forEach(el => el.remove());
+            
+            const htmlFinal = '<!DOCTYPE html>\n' + contenidoCompleto.outerHTML;
+            const blob = new Blob([htmlFinal], {type: 'text/html'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'index.html';
+            link.click();
+            
+            alert('✅ index.html generado!\n\nTiene TODO:\n✅ Imágenes incluidas\n✅ Proyectos\n✅ Publicaciones\n✅ Sin modo admin\n\n📤 Subilo a GitHub');
         }
 
         function exportData() {
